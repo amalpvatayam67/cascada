@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Cascada – Explainability View</title>
+    <style>
+      body {
+        font-family: Arial;
+        margin: 40px;
+      }
+      .path {
+        font-weight: bold;
+        margin-top: 20px;
+      }
+      .risk {
+        color: darkred;
+      }
+      ul {
+        margin-left: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Cascada – Attack Path Explanation</h1>
+
+    <div id="content">Loading…</div>
+
+    <script>
+      fetch("/data")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.error) {
+            document.getElementById("content").innerText = data.error;
+            return;
+          }
+
+          const path = data.results[0];
+          let html = "";
+
+          html += `<div class="path">${path.path.join(" → ")}</div>`;
+          html += `<div class="risk">Risk Score: ${path.risk_score}</div>`;
+          html += "<h3>Why this is dangerous:</h3><ul>";
+
+          path.reasons.forEach((r) => {
+            html += `<li>${r}</li>`;
+          });
+
+          html += "</ul>";
+
+          document.getElementById("content").innerHTML = html;
+        });
+    </script>
+  </body>
+</html>

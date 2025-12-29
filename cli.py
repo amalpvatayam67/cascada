@@ -74,6 +74,14 @@ if __name__ == "__main__":
     scored_paths = [scorer.score_path(p) for p in paths]
     scored_paths.sort(key=lambda x: x["risk_score"], reverse=True)
 
+    # Always persist latest result for UI
+    OUTPUT_DIR = Path(__file__).resolve().parent / "outputs"
+    OUTPUT_DIR.mkdir(exist_ok=True)
+
+    with open(OUTPUT_DIR / "latest.json", "w") as f:
+        json.dump(output_json(scored_paths), f, indent=2)
+
+    # Control only terminal output format
     if args.format == "json":
         print(json.dumps(output_json(scored_paths), indent=2))
     else:
