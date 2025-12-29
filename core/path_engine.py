@@ -7,11 +7,19 @@ class PathEngine:
         self,
         graph: nx.DiGraph,
         max_depth: int = 6,
-        max_paths: int = 50
+        max_paths: int = 50,
+        path_mode: str = "first_impact"
     ):
+        """
+        path_mode:
+          - first_impact        : stop traversal once a target is reached (default)
+          - full                : enumerate all possible paths within bounds
+          - privilege_dominant  : continue only if privilege increases (future-safe)
+        """
         self.graph = graph
         self.max_depth = max_depth
         self.max_paths = max_paths
+        self.path_mode = path_mode
 
     def find_paths(
         self,
@@ -54,7 +62,11 @@ class PathEngine:
         # Target reached
         if current in targets:
             results.append(list(path))
-            return
+
+            # FIRST-IMPACT MODE: stop here
+            if self.path_mode == "first_impact":
+                return
+            # FULL / PRIVILEGE-DOMINANT modes continue exploration
 
         # Traverse neighbors
         for neighbor in self.graph.successors(current):
