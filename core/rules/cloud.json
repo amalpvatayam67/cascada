@@ -1,0 +1,8 @@
+{
+  "weights": {
+    "path_length": 1,
+    "external_entry": 15,
+    "privilege_escalation": 40,
+    "sensitive_asset": 35
+  }
+}

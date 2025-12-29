@@ -9,7 +9,7 @@ from core.scorer import RiskScorer
 
 
 BASE_DIR = Path(__file__).resolve().parent
-RULES_FILE = BASE_DIR / "core" / "rules.json"
+RULES_DIR = BASE_DIR / "core" / "rules"
 
 
 def parse_args():
@@ -49,7 +49,12 @@ def parse_args():
         default=50,
         help="Maximum number of attack paths to discover (default: 50)"
     )
-
+    parser.add_argument(
+        "--profile",
+        choices=["default", "cloud", "onprem"],
+        default="default",
+        help="Risk scoring profile (default: default)"
+    )
     args = parser.parse_args()
 
     # Validation guards
@@ -114,7 +119,8 @@ if __name__ == "__main__":
     paths = engine.find_paths(system.entry_points, system.targets)
 
     # Score paths
-    scorer = RiskScorer(graph, RULES_FILE)
+    rules_file = RULES_DIR / f"{args.profile}.json"
+    scorer = RiskScorer(graph, rules_file)
     scored_paths = [scorer.score_path(p) for p in paths]
     scored_paths.sort(key=lambda x: x["risk_score"], reverse=True)
 

@@ -1,47 +1,39 @@
 import json
-from typing import List
-import networkx as nx
 from pathlib import Path
 
 
 class RiskScorer:
-    def __init__(self, graph: nx.DiGraph, rules_path: Path):
+    def __init__(self, graph, rules_file: Path):
         self.graph = graph
-        with open(rules_path, "r") as f:
-            self.rules = json.load(f)
 
-    def score_path(self, path: List[str]) -> dict:
+        with open(rules_file, "r") as f:
+            rules = json.load(f)
+
+        self.weights = rules["weights"]
+
+    def score_path(self, path):
         score = 0
         reasons = []
 
-        # Path length rule
-        if self.rules["path_length"]["enabled"]:
-            base = self.rules["path_length"]["base"]
-            length_score = max(0, base - len(path))
-            score += length_score
-            reasons.append(f"Path length = {len(path)}")
+        # Path length
+        path_len = len(path)
+        score += path_len * self.weights["path_length"]
+        reasons.append(f"Path length = {path_len}")
 
-        # External entry rule
-        if self.rules["external_entry"]["enabled"]:
-            entry_type = self.graph.nodes[path[0]].get("type")
-            if entry_type == "external":
-                score += self.rules["external_entry"]["score"]
-                reasons.append("Externally reachable entry point")
+        # External entry
+        if path[0] == "internet":
+            score += self.weights["external_entry"]
+            reasons.append("Externally reachable entry point")
 
-        # Privilege escalation rule
-        if self.rules["privilege_escalation"]["enabled"]:
-            for node in path:
-                if self.graph.nodes[node].get("type") == "role":
-                    score += self.rules["privilege_escalation"]["score"]
-                    reasons.append("Privilege escalation via role access")
-                    break
+        # Privilege escalation
+        if any("role" in node for node in path):
+            score += self.weights["privilege_escalation"]
+            reasons.append("Privilege escalation via role access")
 
-        # Sensitive target rule
-        if self.rules["sensitive_target"]["enabled"]:
-            final_type = self.graph.nodes[path[-1]].get("type")
-            if final_type == "data":
-                score += self.rules["sensitive_target"]["score"]
-                reasons.append("Sensitive data asset reached")
+        # Sensitive asset
+        if "db" in path:
+            score += self.weights["sensitive_asset"]
+            reasons.append("Sensitive data asset reached")
 
         return {
             "path": path,
