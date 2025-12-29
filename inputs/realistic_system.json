@@ -1,0 +1,24 @@
+{
+  "entities": [
+    { "id": "internet", "type": "external" },
+    { "id": "lb", "type": "service" },
+    { "id": "api", "type": "service" },
+    { "id": "worker", "type": "machine" },
+    { "id": "cache", "type": "data" },
+    { "id": "db", "type": "data" },
+    { "id": "ops_role", "type": "role" },
+    { "id": "admin_role", "type": "role" }
+  ],
+  "relationships": [
+    { "from": "internet", "to": "lb", "type": "can_access" },
+    { "from": "lb", "to": "api", "type": "can_access" },
+    { "from": "api", "to": "worker", "type": "runs_on" },
+    { "from": "worker", "to": "cache", "type": "can_access" },
+    { "from": "worker", "to": "ops_role", "type": "assumes" },
+    { "from": "ops_role", "to": "db", "type": "can_access" },
+    { "from": "ops_role", "to": "admin_role", "type": "trusts" },
+    { "from": "admin_role", "to": "db", "type": "can_access" }
+  ],
+  "entry_points": ["internet"],
+  "targets": ["db"]
+}

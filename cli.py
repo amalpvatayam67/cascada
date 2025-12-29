@@ -8,6 +8,9 @@ from core.path_engine import PathEngine
 from core.scorer import RiskScorer
 
 
+RULES_FILE = Path(__file__).resolve().parent / "core" / "rules.json"
+
+
 def parse_args():
     parser = argparse.ArgumentParser(
         description="Cascada – Cascading Attack Path Analysis Engine"
@@ -67,7 +70,7 @@ if __name__ == "__main__":
     engine = PathEngine(graph, max_depth=6)
     paths = engine.find_paths(system.entry_points, system.targets)
 
-    scorer = RiskScorer(graph)
+    scorer = RiskScorer(graph, RULES_FILE)
     scored_paths = [scorer.score_path(p) for p in paths]
     scored_paths.sort(key=lambda x: x["risk_score"], reverse=True)
 
